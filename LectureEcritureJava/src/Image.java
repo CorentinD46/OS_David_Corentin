@@ -1,6 +1,8 @@
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
 public class Image {
 	private int width;
@@ -50,19 +52,35 @@ public class Image {
 			}
 		}
 	}
-
+	
+	public void save_bin(String filename) throws IOException {
+		FileOutputStream fos = new FileOutputStream(filename);
+		fos.write("P6\n".getBytes(StandardCharsets.US_ASCII));
+		fos.write((width + " " + height + "\n").getBytes(StandardCharsets.US_ASCII));
+		fos.write("255\n".getBytes(StandardCharsets.US_ASCII));
+		for(int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				fos.write((byte)pixels[y][x][0]);
+				fos.write((byte)pixels[y][x][1]);
+				fos.write((byte)pixels[y][x][2]);
+			}
+		}
+	}
+	
+	
+	
+/*
 	static public void read_txt(String filename) throws IOException {
-		byte[]data = fs.readAllBytes();
+		byte[]data = files.readAllBytes(Paths.get(filename));
 		String txt = new String(data,StandardCharsets.UTF_8);
 		int nbtoken = 0;
 		for ()
 	}
-
+*/
+	
+	
 	public static Image read_bin(String filename) throws IOException {
 		
 	}
 
-	public void write_bin(String filename) throws IOException {
-		
-		}
 }
