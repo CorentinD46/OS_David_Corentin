@@ -15,19 +15,25 @@ public class Inode {
         return MemoryManager.INODE_TABLE_OFFSET + (inodeNumber * INODE_SIZE);
     }
 
+    // QUESTION 3: Pourquoi calcule-t-on un offset ?
     public void writeToMemory(int fileType, int fileSize, long creationTime, 
                              long modificationTime, int[] directPointers, 
                              int indirectPointer, short permissions, int linkCount) {
         byte[] memory = memoryManager.getFilesystemMemory();
         int offset = getInodeOffset();
-
-        // Écrire le numéro d'inode
-        // Écrire le type de fichier
-        // Écrire la taille
-        // Écrire les timestamps
-        // Écrire les pointeurs directs
-        for (int i = 0; i < DIRECT_POINTERS; i++) {
-        }
+        
+        if (offset > MemoryManager.INODE_TABLE_OFFSET || offset < MemoryManager.INODE_TABLE_OFFSET + MemoryManager.INODE_TABLE_SIZE) {
+	        // Écrire le numéro d'inode
+	        offset += Utils.writeInt(memory, offset, inodeNumber);
+	        offset += Utils.writeInt(memory, offset, fileType);
+	        offset += Utils.writeInt(memory, offset, fileSize);
+	        offset += Utils.writeLong(memory, offset, modificationTime);
+	        offset += Utils.writeLong(memory, offset, creationTime);
+	        // Écrire les pointeurs directs
+	        for (int i = 0; i < DIRECT_POINTERS; i++) {
+	        	offset += Utils.writeInt(memory, offset, directPointers[i]);
+	        }
+	    }
         // Écrire le pointeur indirect
         // Écrire les permissions
         // Écrire le nombre de liens

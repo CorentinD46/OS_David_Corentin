@@ -1,5 +1,6 @@
 import java.io.*;
 
+
 public class MemoryManager {
     public static final int BLOCK_SIZE = 512;
     public static final int TOTAL_MEMORY = 1024 * 1024; // 1 Mo
@@ -16,10 +17,10 @@ public class MemoryManager {
     public static final int MAX_INODES = INODE_TABLE_SIZE / INODE_SIZE; // => 508
 
     // CONTRAINTE : Un seul tableau pour TOUT le système de fichiers
-    private byte[] filesystemMemory;
+    private byte[] memory;
 
     public MemoryManager() {
-        this.filesystemMemory = new byte[TOTAL_MEMORY];
+        this.memory = new byte[TOTAL_MEMORY];
         initializeFilesystem();
     }
 
@@ -39,12 +40,27 @@ public class MemoryManager {
         // Exemple minimal (tu peux stocker plus d’infos si tu veux)
         String signature = "MYFS1.0";
         System.arraycopy(signature,BLOCK_SIZE,TOTAL_MEMORY,,MAX_INODES);
-        
-                //! Complétez la fonction
-                // Utiliser System.arraycopy pour stocker MYFS1.0 dans le tableau de 1Mo
-                // Sauvegarder les variables du systeme (block size, total memory, etc, max inodes)
-                // exemple
-                // new byte[] { (byte)(value >>> 24), (byte)(value >>> 16), (byte)(value >>> 8), (byte)value};
+
+        //! Complétez la fonction
+        // Utiliser System.arraycopy pour stocker MYFS1.0 dans le tableau de 1Mo
+        // Sauvegarder les variables du systeme (block size, total memory, etc, max inodes)
+        // exemple
+        // new byte[] { (byte)(value >>> 24), (byte)(value >>> 16), (byte)(value >>> 8), (byte)value};
+
+        //! correction
+        // ÉTAPE 1: Écrire la signature du système
+        for (int i = 0; i < Math.min(27, data.length); i++) {
+                memory[i] = (byte) signature.charAt(i);
+        }
+
+        // byte [] data = signature.getBytes()
+        // equivalent System.arraycopy(data, 0, memory, 0, Math.min(27, data.length));
+
+        // ÉTAPE 2: Écrire quelques infos importantes à des positions fixes
+        Utils.writeInt(memory, 16, BLOCK_SIZE);     // Position 16: taille des blocs
+        Utils.writeInt(memory, 20, TOTAL_MEMORY);   // Position 20: taille totale
+        Utils.writeInt(memory, 24, NUM_BLOCKS);     // Position 24: nombre de blocs
+        // Possible d'utiliser System.arraycopy
     }
 
     public boolean setBlockUsed(int blockNumber, boolean used) {
@@ -55,7 +71,14 @@ public class MemoryManager {
         int bitPosition = blockNumber % 8;
         int offset = BITMAP_OFFSET + byteIndex;
 
-              //! Expliquez pourquoi on utilise un décallage de bit ?
+        // TODO: Complétez cette partie !
+        // INDICE: Utilisez les opérations | (OR) et & (AND) avec des masques
+
+        if (used) {
+            memory[offset] |= (1 << bitPosition);
+        } else {
+        	memory[offset] &= ~(1 << bitPosition);
+        }
 
         return true;
     }
@@ -68,25 +91,34 @@ public class MemoryManager {
         int bitPosition = blockNumber % 8;
         int offset = BITMAP_OFFSET + byteIndex;
 
-        return (filesystemMemory[offset] >> bitPosition) & 1;
+        return (memory[offset] >> bitPosition) & 1;
     }
 
     public int allocateBlock() {
-        // Trouvez un block libre
-                // Dans ce cas, marqué le comme non libre
-                // Et retourner le numéro du block
+        for (int i = 129; i < NUM_BLOCKS; i++) {
+            if (isBlockUsed(i) == 0) {  // Bloc libre trouvé !
+            	setBlockUsed(i,true);// TODO: Le marquer comme occupé
+            	return i;// TODO: L'annoncer à l'utilisateur/ le retourner
+            }
+        }
         return -1; // Pas de bloc libre
     }
 
     public byte[] getFilesystemMemory() {
-        return filesystemMemory;
+        return memory;
     }
 
     public void saveToFile() throws IOException {
-            // Complété la sauvegarde du system avec FileOutputStream
+        // Complété la sauvegarde du system avec FileOutputStream
+
+        //! correction
+        FileOutputStream fos = new FileOutputStream("filesystem.img");
+        fos.write(memory);
+        fos.close();
     }
 
     public void loadFromFile() throws IOException {
             // Complété la sauvegarde du system avec FileInputStream
+        // AIDE: Utilisez FileInputStream
     }
 }

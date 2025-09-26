@@ -1,86 +1,54 @@
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-
 public class Image {
-	private int width;
-	private int height;
-	// pixels[y][x][0=R,1=G,2=B]
-	private int[][][] pixels;
+    public void save_txt(String filename) throws IOException {
+        try (FileWriter writer = new FileWriter(filename)) {
+            writer.write("P3\n");
+            writer.write(width + " " + height + "\n");
+            writer.write("255\n");
 
-	public int getWidth() { return width; }
-	public int getHeight() { return height; }
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int r = pixels[y][x][0];
+                    int g = pixels[y][x][1];
+                    int b = pixels[y][x][2];
+                    writer.write(r + " " + g + " " + b + " ");
+                }
+                writer.write("\n");
+            }
+        }
+    }
 
-	/**
-	 * Constructeur : initialise une image vide.
-	 */
-	public Image(int width, int height) {
-		this.width = width;
-		this.height = height;
-		pixels = new int[height][width][3];
-	}
+    /**
+     * Lecture d'une image au format texte PPM (P3)
+     */
+    public static Image read_txt(String filename) throws IOException {
+        try (FileInputStream fis = new FileInputStream(filename);
+             Scanner sc = new Scanner(fis)) {
 
-	/**
-	 * Définit la couleur d'un pixel à la position (x, y)
-	 */
-	public void setPixel(int x, int y, int r, int g, int b) {
-		if (x >= 0 && x < width && y >= 0 && y < height) {
-			pixels[y][x][0] = r;
-			pixels[y][x][1] = g;
-			pixels[y][x][2] = b;
-		}
-	}
+            // Vérification du format
+            String magic = sc.next();
+            if (!magic.equals("P3")) {
+                throw new IOException("Format PPM non supporté : " + magic);
+            }
 
-	/**
-	 * Sauvegarde l'image au format texte PPM (P3)
-	 */
-	public void save_txt(String filename) throws IOException {
-		try (FileWriter fw = new FileWriter(filename)) {
-			fw.write("P3\n");
-			fw.write(width + " " + height + "\n");
-			fw.write("255\n");
+            // Lecture dimensions + valeur max
+            int width = sc.nextInt();
+            int height = sc.nextInt();
+            int maxVal = sc.nextInt(); // typiquement 255
 
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					fw.write(pixels[y][x][0] + " " +
-							pixels[y][x][1] + " " +
-							pixels[y][x][2] + " ");
-				}
-				fw.write("\n");
-			}
-		}
-	}
-	
-	public void save_bin(String filename) throws IOException {
-		FileOutputStream fos = new FileOutputStream(filename);
-		fos.write("P6\n".getBytes(StandardCharsets.US_ASCII));
-		fos.write((width + " " + height + "\n").getBytes(StandardCharsets.US_ASCII));
-		fos.write("255\n".getBytes(StandardCharsets.US_ASCII));
-		for(int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				fos.write((byte)pixels[y][x][0]);
-				fos.write((byte)pixels[y][x][1]);
-				fos.write((byte)pixels[y][x][2]);
-			}
-		}
-	}
-	
-	
-	
-/*
-	static public void read_txt(String filename) throws IOException {
-		byte[]data = files.readAllBytes(Paths.get(filename));
-		String txt = new String(data,StandardCharsets.UTF_8);
-		int nbtoken = 0;
-		for ()
-	}
-*/
-	
-	
-	public static Image read_bin(String filename) throws IOException {
-		
-	}
+            // Création de l'image
+            Image img = new Image(width, height);
 
+            // Remplissage des pixels
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int r = sc.nextInt();
+                    int g = sc.nextInt();
+                    int b = sc.nextInt();
+                    img.setPixel(x, y, r, g, b);
+                }
+            }
+
+            return img;
+        }
+    }
 }
