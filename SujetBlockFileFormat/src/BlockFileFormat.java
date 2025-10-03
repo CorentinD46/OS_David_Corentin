@@ -114,10 +114,10 @@ public class BlockFileFormat {
             int count = 0;
 
             for (int i = 0; i < remainingInts; i++) {
-                //! TODO Lire un entier (pointeur)
+                //!  Lire un entier (pointeur)
             	int pointeur = buffer.getInt();
-                //! TODO Si le pointeur vaut 0, arrêter la boucle (0 = emplacement non utilisé)
-            	//! TODO Sinon, stocker le pointeur dans le tableau temporaire
+                //!  Si le pointeur vaut 0, arrêter la boucle (0 = emplacement non utilisé)
+            	//!  Sinon, stocker le pointeur dans le tableau temporaire
             	if (pointeur == 0) {
             		break;
             	} else {
@@ -127,7 +127,8 @@ public class BlockFileFormat {
             	
             }
 
-            //! TODO Copier les pointeurs valides dans dataPointers (taille = count)
+            //!  Copier les pointeurs valides dans dataPointers (taille = count)
+            int[] dataPointers = Arrays.copyOf(tmp, count);
         }
     }
 
@@ -173,8 +174,8 @@ public class BlockFileFormat {
      * @throws IOException si le fichier n'existe pas, est inaccessible ou n'est pas valide
      */
     public static BlockFileFormat readFromFile(String filename) throws IOException {
-        RandomAccessFile file = null; //  ouvrir le fichier en lecture
-        Header header = null; // lire l'en-tête du fichier
+    	RandomAccessFile file = new RandomAccessFile(filename, "r");//  ouvrir le fichier en lecture
+    	Header header = readHeader(file); // lire l'en-tête du fichier
         // Vérifier si le header est valide (appel à header.isValid())
         // -> si ce n'est pas le cas, lever une exception IOException avec un message explicite
         if (!header.isValid()) {
