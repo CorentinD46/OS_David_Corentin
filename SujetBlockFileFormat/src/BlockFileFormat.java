@@ -40,18 +40,19 @@ public class BlockFileFormat {
          */
         public void deserialize(ByteBuffer buffer) {
         	byte[] rawData = {0x42, 0x4C, 0x4B, 0x46, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01};
-        	ByteBuffer buffer = ByteBuffer.wrap(rawData);
+        	buffer = ByteBuffer.wrap(rawData);
             //! Lire l'entier magique (magic) pour identifier le format
         	int magic = buffer.getInt();
-            //! TODO Lire la version du format
+            //! Lire la version du format
         	int version = buffer.getInt();
-            //! TODO Lire le nombre de sections (count)
+            //! Lire le nombre de sections (count)
         	int count = buffer.getInt();
-            //! TODO Créer un tableau sectionPointers de taille count
-
+            //! Créer un tableau sectionPointers de taille count
+        	int[] sectionPointers = new int[count];
             // Parcourir le nombre de sections et lire leurs pointeurs
             for (int i = 0; i < count; i++) {
-                //! TODO Lire un entier depuis le buffer et le stocker dans sectionPointers[i]
+                //! Lire un entier depuis le buffer et le stocker dans sectionPointers[i]
+            	sectionPointers[i] = buffer.getInt();
             }
         }
 
@@ -95,15 +96,18 @@ public class BlockFileFormat {
          * @param buffer tampon contenant les données brutes de la section
          */
         public void deserialize(ByteBuffer buffer) {
-            //! TODO Lire le type de la section (int)
-            //! TODO Lire le padding (1 octet, à ignorer)
-
-            //! TODO Lire les 250 octets du nom de la section
-            //! TODO Convertir ces octets en String avec StandardCharsets.UTF_8
-            //! TODO Nettoyer la chaîne (enlever les caractères nuls et espaces inutiles)
-
-            //! TODO Lire encore 1 octet de padding
-
+            //! Lire le type de la section (int)
+        	int type = buffer.getInt();
+            //! Lire le padding (1 octet, à ignorer)
+        	buffer.get();
+            //! Lire les 250 octets du nom de la section
+        	byte[] nameBytes = new byte[250];
+            //! Convertir ces octets en String avec StandardCharsets.UTF_8
+        	String rawName = new String(nameBytes, StandardCharsets.UTF_8);
+            //! Nettoyer la chaîne (enlever les caractères nuls et espaces inutiles)
+        	String cleanName = rawName.replace("\0", "").trim();
+            //! Lire encore 1 octet de padding
+        	buffer.get();
             // Lire la suite du buffer comme une liste d'entiers (pointeurs de blocs)
             int remainingInts = buffer.remaining() / 4;
             int[] tmp = new int[remainingInts];
@@ -111,8 +115,16 @@ public class BlockFileFormat {
 
             for (int i = 0; i < remainingInts; i++) {
                 //! TODO Lire un entier (pointeur)
+            	int pointeur = buffer.getInt();
                 //! TODO Si le pointeur vaut 0, arrêter la boucle (0 = emplacement non utilisé)
-                //! TODO Sinon, stocker le pointeur dans le tableau temporaire
+            	//! TODO Sinon, stocker le pointeur dans le tableau temporaire
+            	if (pointeur == 0) {
+            		break;
+            	} else {
+					tmp[count] = pointeur;
+					count++;
+            	}
+            	
             }
 
             //! TODO Copier les pointeurs valides dans dataPointers (taille = count)
