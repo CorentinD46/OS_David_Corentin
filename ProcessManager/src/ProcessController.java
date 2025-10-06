@@ -29,17 +29,24 @@ public class ProcessController {
      * @throws IOException si le lancement échoue
      */
     public Process executeSimple(String command, String[] args) throws IOException {
-        // TODO Créer un tableau pour stocker la commande complète
-        String[] fullCommand = null;
+        // Créer un tableau pour stocker la commande complète
+        String[] fullCommand;
 
-        // TODO Si args est null, fullCommand = tableau avec juste command
-        // TODO Sinon, fullCommand = tableau avec command + tous les args
+        // Si args est null, fullCommand = tableau avec juste command
+		if (args == null) {
+			fullCommand = new String[] { command };
+		}
+        // Sinon, fullCommand = tableau avec command + tous les args
+		else {
+			fullCommand = new String[args.length + 1];
+			fullCommand[0] = command;
+			System.arraycopy(args, 0, fullCommand, 1, args.length);
+		}
+        //Configurer le ProcessBuilder avec fullCommand
+		processBuilder.command(fullCommand);
 
-        // TODO Configurer le ProcessBuilder avec fullCommand
-        // processBuilder.command(fullCommand);
-
-        // TODO Lancer le processus avec processBuilder.start()
-        currentProcess = null;
+        // Lancer le processus avec processBuilder.start()
+        currentProcess = processBuilder.start();
 
         System.out.println("Lancement de : " + command);
         return currentProcess;
@@ -59,19 +66,23 @@ public class ProcessController {
     public Process executeWithRedirection(String command, File outputFile, 
                                         File errorFile, String[] args) throws IOException {
 
-        // TODO Utiliser executeSimple pour lancer le processus de base
-        Process process = null;
+        // Utiliser executeSimple pour lancer le processus de base
+        Process process = executeSimple(command, args);
 
-        // TODO Si outputFile n'est pas null, configurer la redirection
-        // processBuilder.redirectOutput(outputFile);
+        // Si outputFile n'est pas null, configurer la redirection
+		if (outputFile != null) {
+			processBuilder.redirectOutput(outputFile);
+		}
 
-        // TODO Si errorFile n'est pas null, configurer la redirection d'erreur
-        // processBuilder.redirectError(errorFile);
+        //  Si errorFile n'est pas null, configurer la redirection d'erreur
+		if (errorFile != null) {
+			processBuilder.redirectError(errorFile);
+		}
 
         System.out.println("Redirection configurée - Sortie: " + outputFile + ", Erreur: " + errorFile);
 
-        // TODO Relancer le processus avec les redirections
-        currentProcess = null;
+        //  Relancer le processus avec les redirections
+        currentProcess = processBuilder.start();
         return currentProcess;
     }
 
@@ -85,12 +96,13 @@ public class ProcessController {
      * @throws IOException si le lancement échoue
      */
     public Process executeInteractive(String command, String[] args) throws IOException {
-        // TODO Utiliser executeSimple pour lancer le processus
+        //  Utiliser executeSimple pour lancer le processus
         // (Les flux restent accessibles par défaut)
+    	currentProcess = executeSimple(command, args);
 
         System.out.println("Mode interactif activé pour : " + command);
 
-        return null;
+        return currentProcess;
     }
 
     /**
@@ -114,17 +126,19 @@ public class ProcessController {
             return -1;
         }
     }
-
+    
     /**
      * Envoie des données à l'entrée standard d'un processus interactif.
      */
     public void sendInput(Process process, String input) throws IOException {
-        // TODO Obtenir l'OutputStream du processus
-        OutputStream outputStream = null;
+        //  Obtenir l'OutputStream du processus
+        OutputStream outputStream = process.getOutputStream();
 
         if (outputStream != null) {
-            // TODO Écrire les données + retour à la ligne
-            // TODO Appeler flush() pour forcer l'envoi
+            // Écrire les données + retour à la ligne
+        	outputStream.write((input + );
+            // Appeler flush() pour forcer l'envoi
+        	outputStream.flush();
         }
 
         System.out.println("Envoi vers le processus : " + input);
