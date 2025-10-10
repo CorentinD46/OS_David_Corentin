@@ -136,7 +136,7 @@ public class ProcessController {
 
         if (outputStream != null) {
             // Écrire les données + retour à la ligne
-        	outputStream.write((input + );
+        	outputStream.write((input + "\n").getBytes());
             // Appeler flush() pour forcer l'envoi
         	outputStream.flush();
         }
@@ -148,12 +148,17 @@ public class ProcessController {
      * Lit la sortie standard d'un processus de manière non-bloquante.
      */
     public String readOutput(Process process) throws IOException {
-        // TODO Obtenir l'InputStream du processus
-        InputStream inputStream = null;
+        // Obtenir l'InputStream du processus
+        InputStream inputStream = process.getInputStream();
 
         if (inputStream != null) {
-            // TODO Vérifier s'il y a des données avec inputStream.available()
-            // TODO Si oui, les lire et les retourner comme String
+            // Vérifier s'il y a des données avec inputStream.available()
+			if (inputStream.available() > 0) {
+				// Si oui, les lire et les retourner comme String
+				byte[] buffer = new byte[inputStream.available()];
+				inputStream.read(buffer);
+				return new String(buffer);
+			}
         }
 
         return "";
