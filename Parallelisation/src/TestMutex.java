@@ -1,5 +1,5 @@
 
-public class TestCompteur {
+public class TestMutex {
 	private static final int NOMBRE_TESTS = 50;
 	private static final int NOMBRE_THREADS = 9;
 	private static final int INCREMENTS_PAR_THREAD = 1111111;
@@ -11,11 +11,11 @@ public class TestCompteur {
         int valeurMin = Integer.MAX_VALUE;
         int valeurMax = Integer.MIN_VALUE;
 		for (int test = 1; test <= NOMBRE_TESTS; test++) {
-			CompteurDangereux.resetCompteur();
+			CompteurSecurise.resetCompteur();
 			Thread[] threads = new Thread[NOMBRE_THREADS];
 			for (int i = 0; i < NOMBRE_THREADS; i++) {
 				threads[i] = new Thread(
-						new CompteurDangereux.Incrementeur("Thread-" + i, INCREMENTS_PAR_THREAD)
+						new CompteurSecurise.Incrementeur("Thread-" + i, INCREMENTS_PAR_THREAD)
 						);
 			}
 			//Demarre les thread
@@ -28,7 +28,7 @@ public class TestCompteur {
 				thread.join();
 			}
 			
-			int resultatFinal = CompteurDangereux.getCompteur();
+			int resultatFinal = CompteurSecurise.getCompteur();
             boolean correct = (resultatFinal == RESULTAT_ATTENDU);
 			
 			if (correct) {
